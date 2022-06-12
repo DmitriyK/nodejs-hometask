@@ -17,4 +17,15 @@ router.get('/', async (req, res, next) => {
     }
 }, responseMiddleware);
 
+router.post('/', createUserValid, async (req, res, next) => {
+  try {
+    const user = await UserService.create(req.body);
+    res.data = user;
+  } catch (err) {
+    res.err = err;
+  } finally {
+    next();
+  }
+}, responseMiddleware)
+
 module.exports = router;

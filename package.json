@@ -13,18 +13,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DmitrijDN/nodejs-2020-private.git"
+    "url": "git+https://github.com/DmitriyK/nodejs-hometask.git"
   },
   "keywords": [
     "NodeJS",
     "expressJS"
   ],
-  "author": "Dmitriy Beseda",
+  "author": "Dmitry Komlyk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DmitrijDN/nodejs-2020-private/issues"
+    "url": "https://github.com/DmitriyK/nodejs-hometask/issues"
   },
-  "homepage": "https://github.com/DmitrijDN/nodejs-2020-private#readme",
+  "homepage": "https://github.com/DmitriyK/nodejs-hometask#readme",
   "dependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",

@@ -1,12 +1,14 @@
 const UserService = require('./userService');
 
 class AuthService {
-    login(userData) {
-        const user = UserService.search(userData);
-        if(!user) {
-            throw Error('User not found');
+    login({ email, password = null }) {
+        const user = UserService.search({ email });
+        if (user.password === password) {
+           return user;
         }
-        return user;
+        const err = new Error('Incorrect password');
+        err.code = 400;
+        throw err;
     }
 }
 

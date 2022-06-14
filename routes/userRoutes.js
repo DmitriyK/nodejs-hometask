@@ -9,12 +9,10 @@ const router = Router();
 router.get('/', async (req, res, next) => {
     try {
         const users = await UserService.getAll();
-        if (users.length === 0) {
-            res.status(404);
-            throw Error('Users are not found');
-        }
+        res.statusCode = 200;
         res.data = users;
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();
@@ -25,12 +23,10 @@ router.get('/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
         const user = await UserService.search({ id });
-        if (!user) {
-            res.status(404);
-            throw Error('User is not found');
-        }
+        res.statusCode = 200;
         res.data = user;
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();
@@ -40,8 +36,11 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', createUserValid, async (req, res, next) => {
     try {
         const user = await UserService.create(req.body);
+        res.statusCode = 200;
         res.data = user;
     } catch (err) {
+        console.log(err.code, err.message);
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();
@@ -51,14 +50,11 @@ router.post('/', createUserValid, async (req, res, next) => {
 router.put('/:id', updateUserValid, async (req, res, next) => {
     try {
         const id = req.params.id;
-        const user = await UserService.search({ id });
-        if (!user) {
-            res.status(404);
-            throw Error('User is not found');
-        }
         const updatedUser = await UserService.update(id, req.body);
+        res.statusCode = 200;
         res.data = updatedUser;
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();
@@ -68,14 +64,11 @@ router.put('/:id', updateUserValid, async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
-        const user = await UserService.search({ id });
-        if (!user) {
-            res.status(404);
-            throw Error('User is not found');
-        }
         const deletedUser = await UserService.delete(id);
+        res.statusCode = 200;
         res.data = deletedUser;
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();

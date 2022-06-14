@@ -9,13 +9,11 @@ const router = Router();
 router.get('/', async (req, res, next) => {
     try {
         const fighters = await FighterService.getAll();
-        if (fighters.length === 0) {
-            res.status(404);
-            throw Error('Fighters are not found');
-        }
+        res.statusCode = 200;
         res.data = fighters;
     } catch (err) {
-        res.err = err
+        res.statusCode = err.code;
+        res.err = err;
     } finally {
         next()
     }
@@ -25,13 +23,11 @@ router.get('/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
         const fighter = await FighterService.search({ id });
-        if (!fighter) {
-            res.status(404);
-            throw Error('Fighter is not found')
-        }
-        res.data = fighter
+        res.statusCode = 200;
+        res.data = fighter;
     } catch (err) {
-        res.err = err
+        res.statusCode = err.code;
+        res.err = err;
     } finally {
         next()
     }
@@ -40,9 +36,11 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', createFighterValid, async (req, res, next) => {
     try {
         const fighter = await FighterService.create(req.body);
+        res.statusCode = 200;
         res.data = fighter;
     } catch (err) {
-        res.err = err
+        res.statusCode = err.code;
+        res.err = err;
     } finally {
         next()
     }
@@ -51,14 +49,11 @@ router.post('/', createFighterValid, async (req, res, next) => {
 router.put('/:id', updateFighterValid, async (req, res, next) => {
     try {
         const id = req.params.id;
-        const fighter = await FighterService.search({ id });
-        if (!fighter) {
-            res.status(404);
-            throw Error('Fighter is not found')
-        }
         const updatedFighter = await FighterService.update(id, req.body);
+        res.statusCode = 200;
         res.data = updatedFighter;
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();
@@ -68,14 +63,11 @@ router.put('/:id', updateFighterValid, async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
-        const fighter = await FighterService.search({ id });
-        if (!fighter) {
-            res.status(404);
-            throw Error('Fighter is not found')
-        }
-        const deletedFighter = await FighterService.delete(id)
+        const deletedFighter = await FighterService.delete(id);
+        res.statusCode = 200;
         res.data = deletedFighter
     } catch (err) {
+        res.statusCode = err.code;
         res.err = err;
     } finally {
         next();

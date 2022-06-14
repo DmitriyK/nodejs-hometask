@@ -1,46 +1,60 @@
 const { UserRepository } = require('../repositories/userRepository');
 
 class UserService {
-  // TODO: Implement methods to work with user
-  getAll() {
-      const item = UserRepository.getAll();
-      if (!item) {
-          return null;
-      }
-      return item;
-  }
+    // TODO: Implement methods to work with user
+    getAll() {
+        const items = UserRepository.getAll();
+        if (items.length === 0) {
+            const err = new Error('Users not found');
+            err.code = 404;
+            throw err;
+        }
+        return items;
+    }
 
-  search(search) {
-      const item = UserRepository.getOne(search);
-      if (!item) {
-          return null;
-      }
-      return item;
-  }
+    search(search) {
+        const item = UserRepository.getOne(search);
+        if (!item) {
+            const err = new Error('User not found');
+            err.code = 404;
+            throw err;
+        }
+        return item;
+    }
 
-  create(data) {
-      const item = UserRepository.create(data);
-      if (!item) {
-          return null;
-      }
-      return item;
-  }
+    create(data) {
+        const item = UserRepository.create(data);
+        if (!item) {
+            const err = new Error('User not created');
+            err.code = 400;
+            throw err;
+        }
+        return item;
+    }
 
-  update(id, data) {
-      const item = UserRepository.update(id, data);
-      if (!item) {
-          return null;
-      }
-      return item;
-  }
+    update(id, data) {
+        if (this.search({ id })) {
+            const updatedItem = UserRepository.update(id, data);
+            if (!updatedItem) {
+                const err = new Error('User not updated');
+                err.code = 400;
+                throw err;
+            }
+            return updatedItem;
+        }
+    }
 
-  delete(id) {
-      const item = UserRepository.delete(id);
-      if (!item) {
-          return null;
-      }
-      return item;
-  }
+    delete(id) {
+        if (this.search({ id })) {
+            const deletedItem = UserRepository.delete(id);
+            if (!deletedItem) {
+                const err = new Error('User not deleted');
+                err.code = 400;
+                throw err;
+            }
+            return deletedItem;
+        }
+    }
 }
 
 module.exports = new UserService();

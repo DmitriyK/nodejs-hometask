@@ -1,8 +1,8 @@
-const UserService = require('./userService');
-const FighterService = require('./fighterService');
+const { UserRepository } = require('../repositories/userRepository');
+const { FighterRepository } = require('../repositories/fighterRepository');
 
 class ValidationService {
-  isString(value, minLength = 1, maxLength = 99) {
+  isString({ value, minLength = 1, maxLength = 99 }) {
     if (typeof value === 'string') {
       const lengthValue = value.trim().length;
       if (lengthValue >= minLength && lengthValue <= maxLength) {
@@ -13,9 +13,9 @@ class ValidationService {
     return false;
   }
 
-  isNumber(value, min = null, max = null) {
+  isNumber({ value, min = 1, max = 120 }) {
     if (typeof value === 'number') {
-      if ( min < value && value < max) {
+      if ( min <= value && value <= max) {
         return true;
       }
       return false;
@@ -28,31 +28,24 @@ class ValidationService {
   }
 
   isEmail(value) {
-    if (this.isString(value) && value.slice(-10) === '@gmail.com') {
+    if (this.isString({ value }) && /^[\w.+\-]+@gmail\.com$/g.test(value)) {
       return true;
     }
     return false;
   }
 
-  isExist(value, type = 'user') {
-    if (type === 'user') {
-      console.log(value, UserService.search(value))
-      if (UserService.search(value)) {
-        return true;
-      }
-      return false;
+  isExist({ key, value, type = 'user' }) {
+    const repository  = type === 'user' ? UserRepository : FighterRepository;
+    const finded = repository.getAll().find(element => value.toLowerCase() === element[key].toLowerCase());
+    if (finded) {
+      return true;
     }
-    if (type === 'fighter') {
-      if (FighterService.search(value)) {
-        return true;
-      }
-      return false;
-    }
+    return false
   }
 
 
   isPhoneNumber(value) {
-    if(this.isString(value)){
+    if (this.isString({ value })){
       const isValid = value.match(/\+380[0-9]{9}/);
       if (isValid){
         return true;
@@ -63,52 +56,52 @@ class ValidationService {
   }
 
   validateUser(data) {
-    for (let prop in data) {
-      switch(prop) {
+    for (const [key, value] of Object.entries(data)) {
+      switch(key) {
         case 'firstName':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('First name is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('First name is required');
           }
-          if (!this.isString(data[prop])) {
-            throw Error('First name is not valid');
+          if (!this.isString({ value })) {
+            throw new Error('First name is not valid');
           }
           break;
         case 'lastName':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Last name is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('Last name is required');
           }
-          if (!this.isString(data[prop])) {
-            throw Error('Last name is not valid');
+          if (!this.isString({ value })) {
+            throw new Error('Last name is not valid');
           }
           break;
         case 'email':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Email is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('Email is required');
           }
-          if (this.isExist({ email: data[prop] })) {
-            throw Error('Email is exist');
+          if (this.isExist({ key, value })) {
+            throw new Error('Email is exist');
           }
-          if (!this.isEmail(data[prop])) {
-            throw Error('Email must be @gmail.com');
+          if (!this.isEmail(value)) {
+            throw new Error('Email must be @gmail.com');
           }
           break;
         case 'phoneNumber':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Phone number is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('Phone number is required');
           }
-          if (this.isExist({ phoneNumber: data[prop] }, user)) {
-            throw Error('Phone number is exist');
+          if (this.isExist({ key, value })) {
+            throw new Error('Phone number is exist');
           }
-          if (!this.isPhoneNumber(data[prop])) {
-            throw Error('Phone number format +380XXXXXXXXX');
+          if (!this.isPhoneNumber(value)) {
+            throw new Error('Phone number format +380XXXXXXXXX');
           }
           break;
         case 'password':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Password is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('Password is required');
           }
-          if (!this.isString(data[prop], 3)) {
-            throw Error('Password must contain min 3 symbols');
+          if (!this.isString({ value, min: 3 })) {
+            throw new Error('Password must contain min 3 symbols');
           }
           break;
         default:
@@ -119,39 +112,38 @@ class ValidationService {
   }
 
   validateFighter(data) {
-    for (let prop in data) {
-      switch(prop) {
+    for (const [key, value] of Object.entries(data)) {
+      switch(key) {
         case 'name':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Name is required');
+          if (this.isEmptyStr(value)) {
+            throw new Error('Name is required');
           }
-          if (this.isExist({ name: data[prop] }, 'fighter')) {
-            throw Error('Name is exist');
+          if (this.isExist({ key, value, type: 'fighter' })) {
+            throw new Error('Name is exist');
           }
-          if (!this.isString(data[prop])) {
-            throw Error('Name is not valid');
+          if (!this.isString({ value })) {
+            throw new Error('Name is not valid');
           }
           break;
         case 'health':
-          console.log(data[prop]);
-          if (!this.isNumber(data[prop], 80, 120)) {
-            throw Error('Health is not valid');
+          if (!this.isNumber({ value, min: 80, max: 120 })) {
+            throw new Error('Health must be from 80 to 120');
           }
           break;
         case 'power':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Power is required');
+          if (value === null || value === 0) {
+            throw new Error('Power is required');
           }
-          if (!this.isNumber(data[prop], 1, 100)) {
-            throw Error('Power is not valid');
+          if (!this.isNumber({ value, min: 1, max: 100 })) {
+            throw new Error('Power must be from 1 to 100');
           }
           break;
         case 'defense':
-          if (this.isEmptyStr(data[prop])) {
-            throw Error('Defense is required');
+          if (value === null || value === 0) {
+            throw new Error('Defense is required');
           }
-          if (!this.isNumber(data[prop], 1, 10)) {
-            throw Error('Defense is not valid');
+          if (!this.isNumber({ value, min: 1, max: 10})) {
+            throw new Error('Defense must be from 1 to 10');
           }
           break;
         default:

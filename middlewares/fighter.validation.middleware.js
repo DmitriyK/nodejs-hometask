@@ -1,19 +1,23 @@
 const { fighter } = require('../models/fighter');
 const ValidationService = require('../services/validationService');
 
+const checkFighterEntity = (dataFighter) => {
+    if (Object.keys(dataFighter).length === 0) {
+        throw Error('Fighter entity must not be empty')
+    }
+    for (let key in dataFighter) {
+        if (key === 'id' || !fighter.hasOwnProperty(key)) {
+            throw Error('Fighter entity to create isn\'t valid');
+        }
+    }
+}
+
 const createFighterValid = (req, res, next) => {
     // TODO: Implement validatior for fighter entity during creation
     try {
-        const dataFighter = req.body;
-        if (Object.keys(dataFighter).length === 0) {
-            throw Error('Fighter entity must not be empty')
-        }
-        for (let key in dataFighter) {
-            if (key === 'id' || !fighter.hasOwnProperty(key)) {
-                throw Error('Fighter entity to create isn\'t valid');
-            }
-        }
-        const fighterValid = ValidationService.validateFighter({ ...fighter, ...dataFighter });
+        checkFighterEntity(req.body);
+        console.log(req.body);
+        const fighterValid = ValidationService.validateFighter({ ...fighter, ...req.body });
         if (fighterValid) {
             req.body = fighterValid;
             next();
@@ -26,16 +30,8 @@ const createFighterValid = (req, res, next) => {
 const updateFighterValid = (req, res, next) => {
     // TODO: Implement validatior for fighter entity during update
     try {
-        const dataFighter = req.body;
-        if (Object.keys(dataFighter).length === 0) {
-            throw Error('Fighter entity must not be empty');
-        };
-        for (let key in dataFighter) {
-            if (key === 'id' || !fighter.hasOwnProperty(key)) {
-                throw Error('Fighter entity to create isn\'t valid');
-            }
-        };
-        const fighterValid = ValidationService.validateFighter({ ...dataFighter });
+        checkFighterEntity(req.body);
+        const fighterValid = ValidationService.validateFighter({ ...req.body });
         if (fighterValid) {
             req.body = fighterValid;
             next();
